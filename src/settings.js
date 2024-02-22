@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'go-admin后台管理系统',
+  title: "go-admin后台管理系统",
 
   /**
    * @type {boolean} true | false
@@ -10,7 +10,7 @@ module.exports = {
   /**
    * 是否显示顶部导航
    */
-  topNav: true,
+  topNav: false,
 
   /**
    * @type {boolean} true | false
@@ -36,7 +36,7 @@ module.exports = {
    * The default is only used in the production env
    * If you want to also use it in dev, you can pass ['production', 'development']
    */
-  errorLog: 'production',
+  errorLog: "production",
 
-  themeStyle: 'dark'
-}
+  themeStyle: "dark",
+};
