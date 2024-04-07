@@ -88,17 +88,15 @@
             align="center"
             prop="examType"
             :show-overflow-tooltip="true"
-          /><el-table-column
-            label="考试科目"
-            align="center"
-            prop="examSub"
-            :show-overflow-tooltip="true"
-          /><el-table-column
-            label="学期名称"
-            align="center"
-            prop="termName"
-            :show-overflow-tooltip="true"
-          />
+          /><el-table-column label="考试科目" align="center" prop="examSub" :formatter="examSubFormat" width="100">
+            <template slot-scope="scope">
+              {{ examSubFormat(scope.row) }}
+            </template>
+          </el-table-column><el-table-column label="学期名称" align="center" prop="termName" :formatter="termNameFormat" width="100">
+            <template slot-scope="scope">
+              {{ termNameFormat(scope.row) }}
+            </template>
+          </el-table-column>
           <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
             <template slot-scope="scope">
               <el-popconfirm
@@ -178,16 +176,30 @@
               />
             </el-form-item>
             <el-form-item label="考试科目" prop="examSub">
-              <el-input
+              <el-select
                 v-model="form.examSub"
-                placeholder="考试科目"
-              />
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in examSubOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
             </el-form-item>
             <el-form-item label="学期名称" prop="termName">
-              <el-input
+              <el-select
                 v-model="form.termName"
-                placeholder="学期名称"
-              />
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in termNameOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -203,6 +215,8 @@
 <script>
 import { addTbExam, delTbExam, getTbExam, listTbExam, updateTbExam } from '@/api/admin/tb-exam'
 
+import { listTbSub } from '@/api/admin/tb-sub'
+import { listTbTerm } from '@/api/admin/tb-term'
 export default {
   name: 'TbExam',
   components: {
@@ -229,6 +243,8 @@ export default {
       tbExamList: [],
 
       // 关系表类型
+      examSubOptions: [],
+      termNameOptions: [],
 
       // 查询参数
       queryParams: {
@@ -249,6 +265,8 @@ export default {
   },
   created() {
     this.getList()
+    this.getTbSubItems()
+    this.getTbTermItems()
   },
   methods: {
     /** 查询参数列表 */
@@ -287,7 +305,23 @@ export default {
     fileClose: function() {
       this.fileOpen = false
     },
+    examSubFormat(row) {
+      return this.selectItemsLabel(this.examSubOptions, row.examSub)
+    },
+    termNameFormat(row) {
+      return this.selectItemsLabel(this.termNameOptions, row.termName)
+    },
     // 关系
+    getTbSubItems() {
+      this.getItems(listTbSub, undefined).then(res => {
+        this.examSubOptions = this.setItems(res, 'name', 'name')
+      })
+    },
+    getTbTermItems() {
+      this.getItems(listTbTerm, undefined).then(res => {
+        this.termNameOptions = this.setItems(res, 'name', 'name')
+      })
+    },
     // 文件
     /** 搜索按钮操作 */
     handleQuery() {

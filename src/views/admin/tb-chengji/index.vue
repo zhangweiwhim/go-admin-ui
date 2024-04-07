@@ -4,47 +4,39 @@
     <template #wrapper>
       <el-card class="box-card">
         <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
-          <el-form-item label="姓名" prop="name"><el-input
+          <el-form-item label="名称" prop="name"><el-input
             v-model="queryParams.name"
-            placeholder="请输入姓名"
+            placeholder="请输入名称"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
           />
           </el-form-item>
-          <el-form-item label="工号" prop="tecNo"><el-input
-            v-model="queryParams.tecNo"
-            placeholder="请输入工号"
-            clearable
-            size="small"
-            @keyup.enter.native="handleQuery"
-          />
-          </el-form-item>
-          <el-form-item label="任职学科" prop="tecNowSub"><el-select
-            v-model="queryParams.tecNowSub"
+          <el-form-item label="年级" prop="grade"><el-select
+            v-model="queryParams.grade"
             placeholder="请选择"
             clearable
             size="small"
           >
             <el-option
-              v-for="dict in tecNowSubOptions"
+              v-for="dict in gradeOptions"
               :key="dict.key"
               :label="dict.value"
               :value="dict.key"
             />
           </el-select>
           </el-form-item>
-          <el-form-item label="任职年级" prop="tecNowGrade"><el-input
-            v-model="queryParams.tecNowGrade"
-            placeholder="请输入任职年级"
+          <el-form-item label="考号" prop="kaoNo"><el-input
+            v-model="queryParams.kaoNo"
+            placeholder="请输入考号"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
           />
           </el-form-item>
-          <el-form-item label="任职班级" prop="tecNowClass"><el-input
-            v-model="queryParams.tecNowClass"
-            placeholder="请输入任职班级"
+          <el-form-item label="考试时间" prop="kaoshiTime"><el-input
+            v-model="queryParams.kaoshiTime"
+            placeholder="请输入考试时间"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
@@ -60,7 +52,7 @@
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
             <el-button
-              v-permisaction="['admin:tbTeacher:add']"
+              v-permisaction="['admin:tbChengji:add']"
               type="primary"
               icon="el-icon-plus"
               size="mini"
@@ -70,7 +62,7 @@
           </el-col>
           <el-col :span="1.5">
             <el-button
-              v-permisaction="['admin:tbTeacher:edit']"
+              v-permisaction="['admin:tbChengji:edit']"
               type="success"
               icon="el-icon-edit"
               size="mini"
@@ -81,7 +73,7 @@
           </el-col>
           <el-col :span="1.5">
             <el-button
-              v-permisaction="['admin:tbTeacher:remove']"
+              v-permisaction="['admin:tbChengji:remove']"
               type="danger"
               icon="el-icon-delete"
               size="mini"
@@ -92,79 +84,79 @@
           </el-col>
         </el-row>
 
-        <el-table v-loading="loading" :data="tbTeacherList" @selection-change="handleSelectionChange">
+        <el-table v-loading="loading" :data="tbChengjiList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" align="center" /><el-table-column
-            label="姓名"
+            label="名称"
             align="center"
             prop="name"
             :show-overflow-tooltip="true"
-          /><el-table-column
-            label="工号"
-            align="center"
-            prop="tecNo"
-            :show-overflow-tooltip="true"
-          /><el-table-column label="任职学科" align="center" prop="tecNowSub" :formatter="tecNowSubFormat" width="100">
+          /><el-table-column label="年级" align="center" prop="grade" :formatter="gradeFormat" width="100">
             <template slot-scope="scope">
-              {{ tecNowSubFormat(scope.row) }}
+              {{ gradeFormat(scope.row) }}
+            </template>
+          </el-table-column><el-table-column label="班级" align="center" prop="class" :formatter="classFormat" width="100">
+            <template slot-scope="scope">
+              {{ classFormat(scope.row) }}
             </template>
           </el-table-column><el-table-column
-            label="任职年级"
+            label="学期"
             align="center"
-            prop="tecNowGrade"
+            prop="xueqi"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="任职班级"
+            label="考号"
             align="center"
-            prop="tecNowClass"
+            prop="kaoNo"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="性别"
+            label="语文"
             align="center"
-            prop="sex"
+            prop="yuwenScore"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="入值时间"
+            label="数学"
             align="center"
-            prop="inTime"
-            :show-overflow-tooltip="true"
-          >
-            <template slot-scope="scope">
-              <span>{{ parseTime(scope.row.inTime) }}</span>
-            </template>
-          </el-table-column><el-table-column
-            label="年级"
-            align="center"
-            prop="age"
+            prop="shuxueScore"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="身份证号"
+            label="英语"
             align="center"
-            prop="idNo"
+            prop="yingyuScore"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="地址"
+            label="政治"
             align="center"
-            prop="address"
+            prop="zhengzhiScore"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="电话"
+            label="历史"
             align="center"
-            prop="tel"
+            prop="lishiScore"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="荣誉"
+            label="地理"
             align="center"
-            prop="honorary"
+            prop="diliScore"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="简介"
+            label="物理"
             align="center"
-            prop="resume"
+            prop="wuliScore"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="其他联系方式"
+            label="化学"
             align="center"
-            prop="otherTel"
+            prop="huaxueScore"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="生物"
+            align="center"
+            prop="shengwuScore"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="考试时间"
+            align="center"
+            prop="kaoshiTime"
             :show-overflow-tooltip="true"
           />
           <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -177,7 +169,7 @@
               >
                 <el-button
                   slot="reference"
-                  v-permisaction="['admin:tbTeacher:edit']"
+                  v-permisaction="['admin:tbChengji:edit']"
                   size="mini"
                   type="text"
                   icon="el-icon-edit"
@@ -192,7 +184,7 @@
               >
                 <el-button
                   slot="reference"
-                  v-permisaction="['admin:tbTeacher:remove']"
+                  v-permisaction="['admin:tbChengji:remove']"
                   size="mini"
                   type="text"
                   icon="el-icon-delete"
@@ -214,97 +206,108 @@
         <!-- 添加或修改对话框 -->
         <el-dialog :title="title" :visible.sync="open" width="500px">
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-
-            <el-form-item label="姓名" prop="name">
+            <el-form-item label="名称" prop="name">
               <el-input
                 v-model="form.name"
-                placeholder="姓名"
+                placeholder="名称"
               />
             </el-form-item>
-            <el-form-item label="工号" prop="tecNo">
-              <el-input
-                v-model="form.tecNo"
-                placeholder="工号"
-              />
-            </el-form-item>
-            <el-form-item label="任职学科" prop="tecNowSub">
+            <el-form-item label="年级" prop="grade">
               <el-select
-                v-model="form.tecNowSub"
+                v-model="form.grade"
                 placeholder="请选择"
               >
                 <el-option
-                  v-for="dict in tecNowSubOptions"
+                  v-for="dict in gradeOptions"
                   :key="dict.key"
                   :label="dict.value"
                   :value="dict.key"
                 />
               </el-select>
             </el-form-item>
-            <el-form-item label="任职年级" prop="tecNowGrade">
+            <el-form-item label="班级" prop="class">
+              <el-select
+                v-model="form.class"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in classOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="学期" prop="xueqi">
               <el-input
-                v-model="form.tecNowGrade"
-                placeholder="任职年级"
+                v-model="form.xueqi"
+                placeholder="学期"
               />
             </el-form-item>
-            <el-form-item label="任职班级" prop="tecNowClass">
+            <el-form-item label="考号" prop="kaoNo">
               <el-input
-                v-model="form.tecNowClass"
-                placeholder="任职班级"
+                v-model="form.kaoNo"
+                placeholder="考号"
               />
             </el-form-item>
-            <el-form-item label="性别" prop="sex">
+            <el-form-item label="语文" prop="yuwenScore">
               <el-input
-                v-model="form.sex"
-                placeholder="性别"
+                v-model="form.yuwenScore"
+                placeholder="语文"
               />
             </el-form-item>
-            <el-form-item label="入值时间" prop="inTime">
-              <el-date-picker
-                v-model="form.inTime"
-                type="datetime"
-                placeholder="选择日期"
+            <el-form-item label="数学" prop="shuxueScore">
+              <el-input
+                v-model="form.shuxueScore"
+                placeholder="数学"
               />
             </el-form-item>
-            <el-form-item label="年级" prop="age">
+            <el-form-item label="英语" prop="yingyuScore">
               <el-input
-                v-model="form.age"
-                placeholder="年级"
+                v-model="form.yingyuScore"
+                placeholder="英语"
               />
             </el-form-item>
-            <el-form-item label="身份证号" prop="idNo">
+            <el-form-item label="政治" prop="zhengzhiScore">
               <el-input
-                v-model="form.idNo"
-                placeholder="身份证号"
+                v-model="form.zhengzhiScore"
+                placeholder="政治"
               />
             </el-form-item>
-            <el-form-item label="地址" prop="address">
+            <el-form-item label="历史" prop="lishiScore">
               <el-input
-                v-model="form.address"
-                placeholder="地址"
+                v-model="form.lishiScore"
+                placeholder="历史"
               />
             </el-form-item>
-            <el-form-item label="电话" prop="tel">
+            <el-form-item label="地理" prop="diliScore">
               <el-input
-                v-model="form.tel"
-                placeholder="电话"
+                v-model="form.diliScore"
+                placeholder="地理"
               />
             </el-form-item>
-            <el-form-item label="荣誉" prop="honorary">
+            <el-form-item label="物理" prop="wuliScore">
               <el-input
-                v-model="form.honorary"
-                placeholder="荣誉"
+                v-model="form.wuliScore"
+                placeholder="物理"
               />
             </el-form-item>
-            <el-form-item label="简介" prop="resume">
+            <el-form-item label="化学" prop="huaxueScore">
               <el-input
-                v-model="form.resume"
-                placeholder="简介"
+                v-model="form.huaxueScore"
+                placeholder="化学"
               />
             </el-form-item>
-            <el-form-item label="其他联系方式" prop="otherTel">
+            <el-form-item label="生物" prop="shengwuScore">
               <el-input
-                v-model="form.otherTel"
-                placeholder="其他联系方式"
+                v-model="form.shengwuScore"
+                placeholder="生物"
+              />
+            </el-form-item>
+            <el-form-item label="考试时间" prop="kaoshiTime">
+              <el-input
+                v-model="form.kaoshiTime"
+                placeholder="考试时间"
               />
             </el-form-item>
           </el-form>
@@ -319,11 +322,11 @@
 </template>
 
 <script>
-import { addTbTeacher, delTbTeacher, getTbTeacher, listTbTeacher, updateTbTeacher } from '@/api/admin/tb-teacher'
+import { addTbChengji, delTbChengji, getTbChengji, listTbChengji, updateTbChengji } from '@/api/admin/tb-chengji'
 
-import { listTbSub } from '@/api/admin/tb-sub'
+import { listTbClass } from '@/api/admin/tb-class'
 export default {
-  name: 'TbTeacher',
+  name: 'TbChengji',
   components: {
   },
   data() {
@@ -345,44 +348,44 @@ export default {
       isEdit: false,
       // 类型数据字典
       typeOptions: [],
-      tbTeacherList: [],
+      tbChengjiList: [],
 
       // 关系表类型
-      tecNowSubOptions: [],
+      gradeOptions: [],
+      classOptions: [],
 
       // 查询参数
       queryParams: {
         pageIndex: 1,
         pageSize: 10,
         name: undefined,
-        tecNo: undefined,
-        tecNowSub: undefined,
-        tecNowGrade: undefined,
-        tecNowClass: undefined
+        grade: undefined,
+        kaoNo: undefined,
+        kaoshiTime: undefined
 
       },
       // 表单参数
       form: {
       },
       // 表单校验
-      rules: { name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
-        tecNo: [{ required: true, message: '工号不能为空', trigger: 'blur' }],
-        tecNowSub: [{ required: true, message: '任职学科不能为空', trigger: 'blur' }],
-        tecNowGrade: [{ required: true, message: '任职年级不能为空', trigger: 'blur' }],
-        tecNowClass: [{ required: true, message: '任职班级不能为空', trigger: 'blur' }]
+      rules: { name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
+        grade: [{ required: true, message: '年级不能为空', trigger: 'blur' }],
+        kaoNo: [{ required: true, message: '考号不能为空', trigger: 'blur' }],
+        kaoshiTime: [{ required: true, message: '考试时间不能为空', trigger: 'blur' }]
       }
     }
   },
   created() {
     this.getList()
-    this.getTbSubItems()
+    this.getTbClassItems()
+    this.getTbClassItems()
   },
   methods: {
     /** 查询参数列表 */
     getList() {
       this.loading = true
-      listTbTeacher(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-        this.tbTeacherList = response.data.list
+      listTbChengji(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
+        this.tbChengjiList = response.data.list
         this.total = response.data.count
         this.loading = false
       }
@@ -397,21 +400,22 @@ export default {
     reset() {
       this.form = {
 
+        id: undefined,
         name: undefined,
-        tecNo: undefined,
-        tecNowSub: undefined,
-        tecNowGrade: undefined,
-        tecNowClass: undefined,
-        sex: undefined,
-        inTime: undefined,
-        age: undefined,
-        idNo: undefined,
-        address: undefined,
-        tel: undefined,
-        honorary: undefined,
-        resume: undefined,
-        otherTel: undefined,
-        id: undefined
+        grade: undefined,
+        class: undefined,
+        xueqi: undefined,
+        kaoNo: undefined,
+        yuwenScore: undefined,
+        shuxueScore: undefined,
+        yingyuScore: undefined,
+        zhengzhiScore: undefined,
+        lishiScore: undefined,
+        diliScore: undefined,
+        wuliScore: undefined,
+        huaxueScore: undefined,
+        shengwuScore: undefined,
+        kaoshiTime: undefined
       }
       this.resetForm('form')
     },
@@ -421,13 +425,17 @@ export default {
     fileClose: function() {
       this.fileOpen = false
     },
-    tecNowSubFormat(row) {
-      return this.selectItemsLabel(this.tecNowSubOptions, row.tecNowSub)
+    gradeFormat(row) {
+      return this.selectItemsLabel(this.gradeOptions, row.grade)
+    },
+    classFormat(row) {
+      return this.selectItemsLabel(this.classOptions, row.class)
     },
     // 关系
-    getTbSubItems() {
-      this.getItems(listTbSub, undefined).then(res => {
-        this.tecNowSubOptions = this.setItems(res, 'name', 'name')
+    getTbClassItems() {
+      this.getItems(listTbClass, undefined).then(res => {
+        this.gradeOptions = this.setItems(res, 'grade', 'grade')
+        this.classOptions = this.setItems(res, 'class', 'class')
       })
     },
     // 文件
@@ -446,7 +454,7 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = '添加教师管理'
+      this.title = '添加成绩管理'
       this.isEdit = false
     },
     // 多选框选中数据
@@ -460,10 +468,10 @@ export default {
       this.reset()
       const id =
                 row.id || this.ids
-      getTbTeacher(id).then(response => {
+      getTbChengji(id).then(response => {
         this.form = response.data
         this.open = true
-        this.title = '修改教师管理'
+        this.title = '修改成绩管理'
         this.isEdit = true
       })
     },
@@ -472,7 +480,7 @@ export default {
       this.$refs['form'].validate(valid => {
         if (valid) {
           if (this.form.id !== undefined) {
-            updateTbTeacher(this.form).then(response => {
+            updateTbChengji(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
@@ -482,7 +490,7 @@ export default {
               }
             })
           } else {
-            addTbTeacher(this.form).then(response => {
+            addTbChengji(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
@@ -504,7 +512,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(function() {
-        return delTbTeacher({ 'ids': Ids })
+        return delTbChengji({ 'ids': Ids })
       }).then((response) => {
         if (response.code === 200) {
           this.msgSuccess(response.msg)

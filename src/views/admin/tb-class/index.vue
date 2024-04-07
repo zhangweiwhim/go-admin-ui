@@ -4,71 +4,43 @@
     <template #wrapper>
       <el-card class="box-card">
         <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
-          <el-form-item label="任教年级" prop="grade"><el-input
+          <el-form-item label="学期" prop="xueqi"><el-select
+            v-model="queryParams.xueqi"
+            placeholder="请选择"
+            clearable
+            size="small"
+          >
+            <el-option
+              v-for="dict in xueqiOptions"
+              :key="dict.key"
+              :label="dict.value"
+              :value="dict.key"
+            />
+          </el-select>
+          </el-form-item>
+          <el-form-item label="年级" prop="grade"><el-input
             v-model="queryParams.grade"
-            placeholder="请输入任教年级"
+            placeholder="请输入年级"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
           />
           </el-form-item>
-          <el-form-item label="任教班级" prop="class"><el-input
+          <el-form-item label="班级" prop="class"><el-input
             v-model="queryParams.class"
-            placeholder="请输入任教班级"
+            placeholder="请输入班级"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
           />
           </el-form-item>
-          <el-form-item label="任教学科" prop="subject"><el-input
-            v-model="queryParams.subject"
-            placeholder="请输入任教学科"
+          <el-form-item label="班主任" prop="headTeacher"><el-input
+            v-model="queryParams.headTeacher"
+            placeholder="请输入班主任"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
           />
-          </el-form-item>
-          <el-form-item label="教师名称" prop="techName"><el-select
-            v-model="queryParams.techName"
-            placeholder="请选择"
-            clearable
-            size="small"
-          >
-            <el-option
-              v-for="dict in techNameOptions"
-              :key="dict.key"
-              :label="dict.value"
-              :value="dict.key"
-            />
-          </el-select>
-          </el-form-item>
-          <el-form-item label="教师工号" prop="techNo"><el-select
-            v-model="queryParams.techNo"
-            placeholder="请选择"
-            clearable
-            size="small"
-          >
-            <el-option
-              v-for="dict in techNoOptions"
-              :key="dict.key"
-              :label="dict.value"
-              :value="dict.key"
-            />
-          </el-select>
-          </el-form-item>
-          <el-form-item label="任教学期" prop="techTerm"><el-select
-            v-model="queryParams.techTerm"
-            placeholder="请选择"
-            clearable
-            size="small"
-          >
-            <el-option
-              v-for="dict in techTermOptions"
-              :key="dict.key"
-              :label="dict.value"
-              :value="dict.key"
-            />
-          </el-select>
           </el-form-item>
 
           <el-form-item>
@@ -80,7 +52,7 @@
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
             <el-button
-              v-permisaction="['admin:tbTeachAll:add']"
+              v-permisaction="['admin:tbClass:add']"
               type="primary"
               icon="el-icon-plus"
               size="mini"
@@ -90,7 +62,7 @@
           </el-col>
           <el-col :span="1.5">
             <el-button
-              v-permisaction="['admin:tbTeachAll:edit']"
+              v-permisaction="['admin:tbClass:edit']"
               type="success"
               icon="el-icon-edit"
               size="mini"
@@ -101,7 +73,7 @@
           </el-col>
           <el-col :span="1.5">
             <el-button
-              v-permisaction="['admin:tbTeachAll:remove']"
+              v-permisaction="['admin:tbClass:remove']"
               type="danger"
               icon="el-icon-delete"
               size="mini"
@@ -112,35 +84,82 @@
           </el-col>
         </el-row>
 
-        <el-table v-loading="loading" :data="tbTeachAllList" @selection-change="handleSelectionChange">
+        <el-table v-loading="loading" :data="tbClassList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" align="center" /><el-table-column
-            label="任教年级"
+            label="名称"
+            align="center"
+            prop="name"
+            :show-overflow-tooltip="true"
+          /><el-table-column label="学期" align="center" prop="xueqi" :formatter="xueqiFormat" width="100">
+            <template slot-scope="scope">
+              {{ xueqiFormat(scope.row) }}
+            </template>
+          </el-table-column><el-table-column
+            label="年级"
             align="center"
             prop="grade"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="任教班级"
+            label="班级"
             align="center"
             prop="class"
             :show-overflow-tooltip="true"
           /><el-table-column
-            label="任教学科"
+            label="班主任"
             align="center"
-            prop="subject"
+            prop="headTeacher"
             :show-overflow-tooltip="true"
-          /><el-table-column label="教师名称" align="center" prop="techName" :formatter="techNameFormat" width="100">
-            <template slot-scope="scope">
-              {{ techNameFormat(scope.row) }}
-            </template>
-          </el-table-column><el-table-column label="教师工号" align="center" prop="techNo" :formatter="techNoFormat" width="100">
-            <template slot-scope="scope">
-              {{ techNoFormat(scope.row) }}
-            </template>
-          </el-table-column><el-table-column label="任教学期" align="center" prop="techTerm" :formatter="techTermFormat" width="100">
-            <template slot-scope="scope">
-              {{ techTermFormat(scope.row) }}
-            </template>
-          </el-table-column>
+          /><el-table-column
+            label="语文老师"
+            align="center"
+            prop="yuwenTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="数学老师"
+            align="center"
+            prop="shuxueTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="英语老师"
+            align="center"
+            prop="yingyuTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="政治老师"
+            align="center"
+            prop="zhengzhiTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="历史老师"
+            align="center"
+            prop="lishiTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="地理老师"
+            align="center"
+            prop="diliTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="物理老师"
+            align="center"
+            prop="wuliTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="化学老师"
+            align="center"
+            prop="huaxueTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="生物老师"
+            align="center"
+            prop="shengwuTeacher"
+            :show-overflow-tooltip="true"
+          /><el-table-column
+            label="人数"
+            align="center"
+            prop="nums"
+            :show-overflow-tooltip="true"
+          />
           <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
             <template slot-scope="scope">
               <el-popconfirm
@@ -151,7 +170,7 @@
               >
                 <el-button
                   slot="reference"
-                  v-permisaction="['admin:tbTeachAll:edit']"
+                  v-permisaction="['admin:tbClass:edit']"
                   size="mini"
                   type="text"
                   icon="el-icon-edit"
@@ -166,7 +185,7 @@
               >
                 <el-button
                   slot="reference"
-                  v-permisaction="['admin:tbTeachAll:remove']"
+                  v-permisaction="['admin:tbClass:remove']"
                   size="mini"
                   type="text"
                   icon="el-icon-delete"
@@ -189,48 +208,102 @@
         <el-dialog :title="title" :visible.sync="open" width="500px">
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
 
-            <el-form-item label="任教年级" prop="grade">
+            <el-form-item label="名称" prop="name">
               <el-input
-                v-model="form.grade"
-                placeholder="任教年级"
+                v-model="form.name"
+                placeholder="名称"
               />
             </el-form-item>
-            <el-form-item label="任教班级" prop="class">
-              <el-input
-                v-model="form.class"
-                placeholder="任教班级"
-              />
-            </el-form-item>
-            <el-form-item label="任教学科" prop="subject">
-              <el-input
-                v-model="form.subject"
-                placeholder="任教学科"
-              />
-            </el-form-item>
-            <el-form-item label="教师名称" prop="techName">
-              <el-input
-                v-model="form.techName"
-                placeholder="教师名称"
-              />
-            </el-form-item>
-            <el-form-item label="教师工号" prop="techNo">
-              <el-input
-                v-model="form.techNo"
-                placeholder="教师工号"
-              />
-            </el-form-item>
-            <el-form-item label="任教学期" prop="techTerm">
+            <el-form-item label="学期" prop="xueqi">
               <el-select
-                v-model="form.techTerm"
+                v-model="form.xueqi"
                 placeholder="请选择"
               >
                 <el-option
-                  v-for="dict in techTermOptions"
+                  v-for="dict in xueqiOptions"
                   :key="dict.key"
                   :label="dict.value"
                   :value="dict.key"
                 />
               </el-select>
+            </el-form-item>
+            <el-form-item label="年级" prop="grade">
+              <el-input
+                v-model="form.grade"
+                placeholder="年级"
+              />
+            </el-form-item>
+            <el-form-item label="班级" prop="class">
+              <el-input
+                v-model="form.class"
+                placeholder="班级"
+              />
+            </el-form-item>
+            <el-form-item label="班主任" prop="headTeacher">
+              <el-input
+                v-model="form.headTeacher"
+                placeholder="班主任"
+              />
+            </el-form-item>
+            <el-form-item label="语文老师" prop="yuwenTeacher">
+              <el-input
+                v-model="form.yuwenTeacher"
+                placeholder="语文老师"
+              />
+            </el-form-item>
+            <el-form-item label="数学老师" prop="shuxueTeacher">
+              <el-input
+                v-model="form.shuxueTeacher"
+                placeholder="数学老师"
+              />
+            </el-form-item>
+            <el-form-item label="英语老师" prop="yingyuTeacher">
+              <el-input
+                v-model="form.yingyuTeacher"
+                placeholder="英语老师"
+              />
+            </el-form-item>
+            <el-form-item label="政治老师" prop="zhengzhiTeacher">
+              <el-input
+                v-model="form.zhengzhiTeacher"
+                placeholder="政治老师"
+              />
+            </el-form-item>
+            <el-form-item label="历史老师" prop="lishiTeacher">
+              <el-input
+                v-model="form.lishiTeacher"
+                placeholder="历史老师"
+              />
+            </el-form-item>
+            <el-form-item label="地理老师" prop="diliTeacher">
+              <el-input
+                v-model="form.diliTeacher"
+                placeholder="地理老师"
+              />
+            </el-form-item>
+            <el-form-item label="物理老师" prop="wuliTeacher">
+              <el-input
+                v-model="form.wuliTeacher"
+                placeholder="物理老师"
+              />
+            </el-form-item>
+            <el-form-item label="化学老师" prop="huaxueTeacher">
+              <el-input
+                v-model="form.huaxueTeacher"
+                placeholder="化学老师"
+              />
+            </el-form-item>
+            <el-form-item label="生物老师" prop="shengwuTeacher">
+              <el-input
+                v-model="form.shengwuTeacher"
+                placeholder="生物老师"
+              />
+            </el-form-item>
+            <el-form-item label="人数" prop="nums">
+              <el-input
+                v-model="form.nums"
+                placeholder="人数"
+              />
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -244,12 +317,11 @@
 </template>
 
 <script>
-import { addTbTeachAll, delTbTeachAll, getTbTeachAll, listTbTeachAll, updateTbTeachAll } from '@/api/admin/tb-teach-all'
+import { addTbClass, delTbClass, getTbClass, listTbClass, updateTbClass } from '@/api/admin/tb-class'
 
-import { listTbTeacher } from '@/api/admin/tb-teacher'
 import { listTbTerm } from '@/api/admin/tb-term'
 export default {
-  name: 'TbTeachAll',
+  name: 'TbClass',
   components: {
   },
   data() {
@@ -271,50 +343,42 @@ export default {
       isEdit: false,
       // 类型数据字典
       typeOptions: [],
-      tbTeachAllList: [],
+      tbClassList: [],
 
       // 关系表类型
-      techNameOptions: [],
-      techNoOptions: [],
-      techTermOptions: [],
+      xueqiOptions: [],
 
       // 查询参数
       queryParams: {
         pageIndex: 1,
         pageSize: 10,
+        xueqi: undefined,
         grade: undefined,
         class: undefined,
-        subject: undefined,
-        techName: undefined,
-        techNo: undefined,
-        techTerm: undefined
+        headTeacher: undefined
 
       },
       // 表单参数
       form: {
       },
       // 表单校验
-      rules: { grade: [{ required: true, message: '任教年级不能为空', trigger: 'blur' }],
-        class: [{ required: true, message: '任教班级不能为空', trigger: 'blur' }],
-        subject: [{ required: true, message: '任教学科不能为空', trigger: 'blur' }],
-        techName: [{ required: true, message: '教师名称不能为空', trigger: 'blur' }],
-        techNo: [{ required: true, message: '教师工号不能为空', trigger: 'blur' }],
-        techTerm: [{ required: true, message: '任教学期不能为空', trigger: 'blur' }]
+      rules: { xueqi: [{ required: true, message: '学期不能为空', trigger: 'blur' }],
+        grade: [{ required: true, message: '年级不能为空', trigger: 'blur' }],
+        class: [{ required: true, message: '班级不能为空', trigger: 'blur' }],
+        headTeacher: [{ required: true, message: '班主任不能为空', trigger: 'blur' }]
       }
     }
   },
   created() {
     this.getList()
-    this.getTbTeacherItems()
-    this.getTbTeacherItems()
     this.getTbTermItems()
   },
   methods: {
     /** 查询参数列表 */
     getList() {
       this.loading = true
-      listTbTeachAll(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-        this.tbTeachAllList = response.data.list
+      listTbClass(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
+        this.tbClassList = response.data.list
         this.total = response.data.count
         this.loading = false
       }
@@ -329,13 +393,22 @@ export default {
     reset() {
       this.form = {
 
+        id: undefined,
+        name: undefined,
+        xueqi: undefined,
         grade: undefined,
         class: undefined,
-        subject: undefined,
-        techName: undefined,
-        techNo: undefined,
-        techTerm: undefined,
-        id: undefined
+        headTeacher: undefined,
+        yuwenTeacher: undefined,
+        shuxueTeacher: undefined,
+        yingyuTeacher: undefined,
+        zhengzhiTeacher: undefined,
+        lishiTeacher: undefined,
+        diliTeacher: undefined,
+        wuliTeacher: undefined,
+        huaxueTeacher: undefined,
+        shengwuTeacher: undefined,
+        nums: undefined
       }
       this.resetForm('form')
     },
@@ -345,25 +418,13 @@ export default {
     fileClose: function() {
       this.fileOpen = false
     },
-    techNameFormat(row) {
-      return this.selectItemsLabel(this.techNameOptions, row.techName)
-    },
-    techNoFormat(row) {
-      return this.selectItemsLabel(this.techNoOptions, row.techNo)
-    },
-    techTermFormat(row) {
-      return this.selectItemsLabel(this.techTermOptions, row.techTerm)
+    xueqiFormat(row) {
+      return this.selectItemsLabel(this.xueqiOptions, row.xueqi)
     },
     // 关系
-    getTbTeacherItems() {
-      this.getItems(listTbTeacher, undefined).then(res => {
-        this.techNameOptions = this.setItems(res, 'name', 'name')
-        this.techNoOptions = this.setItems(res, 'tecNo', 'tecNo')
-      })
-    },
     getTbTermItems() {
       this.getItems(listTbTerm, undefined).then(res => {
-        this.techTermOptions = this.setItems(res, 'name', '')
+        this.xueqiOptions = this.setItems(res, 'name', '')
       })
     },
     // 文件
@@ -382,7 +443,7 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = '添加任教管理'
+      this.title = '添加班级管理'
       this.isEdit = false
     },
     // 多选框选中数据
@@ -396,10 +457,10 @@ export default {
       this.reset()
       const id =
                 row.id || this.ids
-      getTbTeachAll(id).then(response => {
+      getTbClass(id).then(response => {
         this.form = response.data
         this.open = true
-        this.title = '修改任教管理'
+        this.title = '修改班级管理'
         this.isEdit = true
       })
     },
@@ -408,7 +469,7 @@ export default {
       this.$refs['form'].validate(valid => {
         if (valid) {
           if (this.form.id !== undefined) {
-            updateTbTeachAll(this.form).then(response => {
+            updateTbClass(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
@@ -418,7 +479,7 @@ export default {
               }
             })
           } else {
-            addTbTeachAll(this.form).then(response => {
+            addTbClass(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
@@ -440,7 +501,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(function() {
-        return delTbTeachAll({ 'ids': Ids })
+        return delTbClass({ 'ids': Ids })
       }).then((response) => {
         if (response.code === 200) {
           this.msgSuccess(response.msg)
