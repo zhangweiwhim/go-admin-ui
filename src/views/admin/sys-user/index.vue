@@ -190,7 +190,7 @@
                 <el-input v-model="form.nickName" placeholder="请输入用户昵称" />
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+             <!-- <el-col :span="12">
               <el-form-item label="归属部门" prop="deptId">
                 <treeselect
                   v-model="form.deptId"
@@ -198,7 +198,7 @@
                   placeholder="请选择归属部门"
                 />
               </el-form-item>
-            </el-col>
+            </el-col> -->
             <el-col :span="12">
               <el-form-item label="手机号码" prop="phone">
                 <el-input v-model="form.phone" placeholder="请输入手机号码" maxlength="11" />
@@ -243,7 +243,7 @@
               </el-form-item>
             </el-col>
 
-            <el-col :span="12">
+             <!-- <el-col :span="12">
               <el-form-item label="岗位">
                 <el-select v-model="form.postId" placeholder="请选择" @change="$forceUpdate()">
                   <el-option
@@ -255,7 +255,7 @@
                   />
                 </el-select>
               </el-form-item>
-            </el-col>
+            </el-col> -->
             <el-col :span="12">
               <el-form-item label="角色">
                 <el-select v-model="form.roleId" placeholder="请选择" @change="$forceUpdate()">
@@ -397,7 +397,7 @@ export default {
       rules: {
         username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
         nickName: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
-        deptId: [{ required: true, message: '归属部门不能为空', trigger: 'blur' }],
+        // deptId: [{ required: true, message: '归属部门不能为空', trigger: 'blur' }],
         password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }],
         email: [
           { required: true, message: '邮箱地址不能为空', trigger: 'blur' },
