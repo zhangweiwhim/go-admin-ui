@@ -4,7 +4,7 @@
       <el-card class="box-card">
         <el-row :gutter="20">
           <!--部门数据-->
-          <el-col :span="4" :xs="24">
+          <!-- <el-col :span="4" :xs="24">
             <div class="head-container">
               <el-input
                 v-model="deptName"
@@ -26,7 +26,7 @@
                 @node-click="handleNodeClick"
               />
             </div>
-          </el-col>
+          </el-col> -->
           <!--用户数据-->
           <el-col :span="20" :xs="24">
             <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
@@ -442,9 +442,9 @@ export default {
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {
-      treeselect().then(response => {
-        this.deptOptions = response.data
-      })
+      // treeselect().then(response => {
+       // this.deptOptions = response.data
+     // })
     },
     // 筛选节点
     filterNode(value, data) {
