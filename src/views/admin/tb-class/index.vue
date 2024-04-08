@@ -85,12 +85,7 @@
         </el-row>
 
         <el-table v-loading="loading" :data="tbClassList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="55" align="center" /><el-table-column
-            label="名称"
-            align="center"
-            prop="name"
-            :show-overflow-tooltip="true"
-          /><el-table-column label="学期" align="center" prop="xueqi" :formatter="xueqiFormat" width="100">
+          <el-table-column type="selection" width="55" align="center" /><el-table-column label="学期" align="center" prop="xueqi" :formatter="xueqiFormat" width="100">
             <template slot-scope="scope">
               {{ xueqiFormat(scope.row) }}
             </template>
@@ -208,12 +203,7 @@
         <el-dialog :title="title" :visible.sync="open" width="500px">
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
 
-            <el-form-item label="名称" prop="name">
-              <el-input
-                v-model="form.name"
-                placeholder="名称"
-              />
-            </el-form-item>
+            
             <el-form-item label="学期" prop="xueqi">
               <el-select
                 v-model="form.xueqi"
