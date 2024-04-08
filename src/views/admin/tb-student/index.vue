@@ -4,7 +4,7 @@
     <template #wrapper>
       <el-card class="box-card">
         <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
-          <el-form-item label="名称" prop="name"><el-select
+          <!--  <el-form-item label="名称" prop="name"><el-select
             v-model="queryParams.name"
             placeholder="请选择"
             clearable
@@ -17,7 +17,7 @@
               :value="dict.key"
             />
           </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="年级" prop="grade"><el-input
             v-model="queryParams.grade"
             placeholder="请输入年级"
@@ -85,16 +85,15 @@
         </el-row>
 
         <el-table v-loading="loading" :data="tbStudentList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="55" align="center" /><el-table-column label="名称" align="center" prop="name" :formatter="nameFormat" width="100">
-            <template slot-scope="scope">
-              {{ nameFormat(scope.row) }}
-            </template>
-          </el-table-column><el-table-column
+          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column label="名称" align="center" prop="name"  width="100"/>
+          <el-table-column
             label="年级"
             align="center"
             prop="grade"
             :show-overflow-tooltip="true"
-          /><el-table-column
+          />
+          <el-table-column
             label="班级"
             align="center"
             prop="class"
