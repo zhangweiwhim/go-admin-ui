@@ -2,10 +2,11 @@
   <BasicLayout>
     <template #wrapper>
       <el-row :gutter="10">
-        <el-col :span="6" :xs="24">
+        <el-col :class={show: !isEdit,hidden:isEdit} :span="10" :xs="24">
           <el-card class="box-card">
             <div slot="header" class="clearfix">
               <span>个人信息</span>
+              <el-button size="mini" type="primary"  @click="isEdit=true">修改个人信息</el-button>
             </div>
             <div>
               <div class="text-center">
@@ -40,17 +41,17 @@
             </div>
           </el-card>
         </el-col>
-        <el-col :span="18" :xs="24">
+        <el-col :class={show: isEdit,hidden:!isEdit} :span="18" :xs="24">
           <el-card>
             <div slot="header" class="clearfix">
               <span>基本资料</span>
             </div>
             <el-tabs v-model="activeTab">
               <el-tab-pane label="基本资料" name="userinfo">
-                <userInfo :user="user" />
+                <userInfo :user="user" @closeEdit="isEdit=false"/>
               </el-tab-pane>
               <el-tab-pane label="修改密码" name="resetPwd">
-                <resetPwd :user="user" />
+                <resetPwd :user="user" @closeEdit="isEdit=false" />
               </el-tab-pane>
             </el-tabs>
           </el-card>
@@ -71,6 +72,7 @@ export default {
   components: { userAvatar, userInfo, resetPwd },
   data() {
     return {
+      isEdit:false,
       user: {},
       roleGroup: {},
       postGroup: {},
@@ -117,5 +119,18 @@ export default {
   }
   .svg-icon{
     margin-right: 5px;
+  }
+  .clearfix {
+    display: flex;
+    justify-content: space-between;
+    &::after{
+      display:none;
+    }
+  }
+  .show{
+    display:block;
+  }
+  .hidden:{
+    display:none;
   }
 </style>

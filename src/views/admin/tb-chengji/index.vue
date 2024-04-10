@@ -4,9 +4,9 @@
     <template #wrapper>
       <el-card class="box-card">
         <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
-          <el-form-item label="名称" prop="name"><el-input
+          <el-form-item label="学生姓名" prop="name"><el-input
             v-model="queryParams.name"
-            placeholder="请输入名称"
+            placeholder="请输入学生姓名"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
@@ -86,7 +86,7 @@
 
         <el-table v-loading="loading" :data="tbChengjiList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" align="center" /><el-table-column
-            label="名称"
+            label="学生姓名"
             align="center"
             prop="name"
             :show-overflow-tooltip="true"
@@ -206,16 +206,12 @@
         <!-- 添加或修改对话框 -->
         <el-dialog :title="title" :visible.sync="open" width="500px">
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-            <el-form-item label="名称" prop="name">
-              <el-input
-                v-model="form.name"
-                placeholder="名称"
-              />
-            </el-form-item>
+           
             <el-form-item label="年级" prop="grade">
               <el-select
                 v-model="form.grade"
                 placeholder="请选择"
+                @change="getStudengtOp"
               >
                 <el-option
                   v-for="dict in gradeOptions"
@@ -229,6 +225,7 @@
               <el-select
                 v-model="form.class"
                 placeholder="请选择"
+                @change="getStudengtOp"
               >
                 <el-option
                   v-for="dict in classOptions"
@@ -239,10 +236,33 @@
               </el-select>
             </el-form-item>
             <el-form-item label="学期" prop="xueqi">
-              <el-input
+              <el-select
                 v-model="form.xueqi"
-                placeholder="学期"
-              />
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in xueqiOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="学生姓名" prop="name">
+              <el-select
+                filterable
+                :disabled="!studentOptions.length"
+                v-model="form.name"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in studentOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+             
             </el-form-item>
             <el-form-item label="考号" prop="kaoNo">
               <el-input
@@ -323,7 +343,7 @@
 
 <script>
 import { addTbChengji, delTbChengji, getTbChengji, listTbChengji, updateTbChengji } from '@/api/admin/tb-chengji'
-
+import {  listTbStudent } from '@/api/admin/tb-student'
 import { listTbClass } from '@/api/admin/tb-class'
 export default {
   name: 'TbChengji',
@@ -353,6 +373,8 @@ export default {
       // 关系表类型
       gradeOptions: [],
       classOptions: [],
+      xueqiOptions:[],
+      studentOptions:[],
 
       // 查询参数
       queryParams: {
@@ -368,7 +390,9 @@ export default {
       form: {
       },
       // 表单校验
-      rules: { name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
+      rules: { name: [{ required: true, message: '学生姓名不能为空', trigger: 'blur' }],
+        xueqi: [{ required: true, message: '学期不能为空', trigger: 'blur' }],
+        class: [{ required: true, message: '班级不能为空', trigger: 'blur' }],
         grade: [{ required: true, message: '年级不能为空', trigger: 'blur' }],
         kaoNo: [{ required: true, message: '考号不能为空', trigger: 'blur' }],
         kaoshiTime: [{ required: true, message: '考试时间不能为空', trigger: 'blur' }]
@@ -378,10 +402,24 @@ export default {
   created() {
     this.getList()
     this.getTbClassItems()
-    this.getTbClassItems()
   },
   methods: {
     /** 查询参数列表 */
+    // 获取班级学生的信息
+    getStudengtOp() {
+      this.studentOptions=[]
+      if(!this.form.grade||!this.form.class){
+        return
+      }
+      listTbStudent({pageIndex: 1
+        pageSize: 10000
+        grade: this.form.grade,
+        class: this.form.class,
+        beginTime: '',
+        endTime:'', }).then(response => {
+         this.studentOptions = this.setItems(response, 'name', 'name') 
+      })
+    },
     getList() {
       this.loading = true
       listTbChengji(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
@@ -436,6 +474,7 @@ export default {
       this.getItems(listTbClass, undefined).then(res => {
         this.gradeOptions = this.setItems(res, 'grade', 'grade')
         this.classOptions = this.setItems(res, 'class', 'class')
+        this.xueqiOptions = this.setItems(res, 'xueqi', 'xueqi')
       })
     },
     // 文件

@@ -18,21 +18,40 @@
             />
           </el-select>
           </el-form-item> -->
-          <el-form-item label="年级" prop="grade"><el-input
-            v-model="queryParams.grade"
-            placeholder="请输入年级"
-            clearable
-            size="small"
-            @keyup.enter.native="handleQuery"
-          />
+          <el-form-item label="年级" prop="grade">
+            
+            <el-select
+                v-model="queryParams.grade"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in gradeOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+            </el-select>
+           
           </el-form-item>
-          <el-form-item label="班级" prop="class"><el-input
+          <el-form-item label="班级" prop="class">
+            <el-select
+                v-model="queryParams.class"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in classOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+            </el-select>
+            <!-- <el-input
             v-model="queryParams.class"
             placeholder="请输入班级"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
           <el-form-item label="学号" prop="stuNo"><el-input
             v-model="queryParams.stuNo"
@@ -108,12 +127,21 @@
             align="center"
             prop="stuNo"
             :show-overflow-tooltip="true"
-          /><el-table-column
+          />
+          
+          <el-table-column label="性别" align="center" prop="sex" width="100">
+            <template slot-scope="scope">
+              {{ sexFormat[scope.row.sex] }}
+            </template>
+          </el-table-column>
+          
+          <!-- <el-table-column
             label="性别"
             align="center"
             prop="sex"
             :show-overflow-tooltip="true"
-          /><el-table-column
+          /> -->
+          <el-table-column
             label="年龄"
             align="center"
             prop="age"
@@ -208,16 +236,33 @@
               />
             </el-form-item>
             <el-form-item label="年级" prop="grade">
-              <el-input
+             
+              <el-select
                 v-model="form.grade"
-                placeholder="年级"
-              />
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in gradeOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+            
             </el-form-item>
             <el-form-item label="班级" prop="class">
-              <el-input
+              <el-select
                 v-model="form.class"
-                placeholder="班级"
-              />
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in classOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+            </el-select>
+            
             </el-form-item>
             <el-form-item label="班主任" prop="headTeacher">
               <el-input
@@ -232,10 +277,17 @@
               />
             </el-form-item>
             <el-form-item label="性别" prop="sex">
-              <el-input
-                v-model="form.sex"
-                placeholder="性别"
-              />
+
+              <el-select  v-model="form.sex" placeholder="请选择">
+                  <el-option
+                    v-for="dict in sexOptions"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  />
+                </el-select>
+
+            
             </el-form-item>
             <el-form-item label="年龄" prop="age">
               <el-input
@@ -293,8 +345,9 @@
 
 <script>
 import { addTbStudent, delTbStudent, getTbStudent, listTbStudent, updateTbStudent } from '@/api/admin/tb-student'
-
-import { listSysUser } from '@/api/admin/sys-user'
+import { listTbClass } from '@/api/admin/tb-class'
+import { delUser, addUser,listUser } from '@/api/admin/sys-user'
+// import { listSysUser } from '@/api/admin/sys-user'
 export default {
   name: 'TbStudent',
   components: {
@@ -322,7 +375,10 @@ export default {
 
       // 关系表类型
       nameOptions: [],
-
+      gradeOptions:[],
+      classOptions:[],
+      sexOptions: [],
+      sexFormat:{},
       // 查询参数
       queryParams: {
         pageIndex: 1,
@@ -346,9 +402,25 @@ export default {
   },
   created() {
     this.getList()
-    this.getSysUserItems()
+    // this.getSysUserItems()
+    this.getTbClassItems()
+    this.getDicts('sys_user_sex').then(response => {
+      this.sexOptions = response.data
+      const newObj = []
+      response.data.forEach(item => {
+        newObj[item.value] = item.label
+      })
+      this.sexFormat= newObj
+    })
   },
   methods: {
+       // 关系
+    getTbClassItems() {
+      this.getItems(listTbClass, undefined).then(res => {
+        this.gradeOptions = this.setItems(res, 'grade', 'grade')
+        this.classOptions = this.setItems(res, 'class', 'class')
+      })
+    },
     /** 查询参数列表 */
     getList() {
       this.loading = true
@@ -391,15 +463,16 @@ export default {
     fileClose: function() {
       this.fileOpen = false
     },
+   
     nameFormat(row) {
       return this.selectItemsLabel(this.nameOptions, row.name)
     },
     // 关系
-    getSysUserItems() {
-      this.getItems(listSysUser, undefined).then(res => {
-        this.nameOptions = this.setItems(res, 'username', 'username')
-      })
-    },
+    // getSysUserItems() {
+    //   this.getItems(listSysUser, undefined).then(res => {
+    //     this.nameOptions = this.setItems(res, 'username', 'username')
+    //   })
+    // },
     // 文件
     /** 搜索按钮操作 */
     handleQuery() {
@@ -452,15 +525,68 @@ export default {
               }
             })
           } else {
-            addTbStudent(this.form).then(response => {
+
+            const saveParams = {
+                deptId:11,
+              // email:"270@qq.com",
+              nickName: this.form.name,
+              password:"123456",
+              phone:this.form.tel,
+              postId:1,
+              roleId:4,
+              sex:this.form.sex,
+              status:"2",
+              username: this.form.name,
+            }
+         
+          addUser(saveParams).then(response => {
               if (response.code === 200) {
-                this.msgSuccess(response.msg)
-                this.open = false
-                this.getList()
+               
+                listUser({ pageIndex: 1,
+                  pageSize: 10000,}).then(users => {
+                    const commonNameList = users.data.list.filter(d=>d.username==this.form.name&&d.nickName==this.form.name&&d.roleId==4).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())
+                    console.log(12333, '新增的用户',commonNameList );
+                    const createParams = JSON.parse(JSON.stringify(this.form))
+                    createParams.id = commonNameList[0]?.userId
+                    updateTbStudent(createParams).then(res => {
+                        if (res.code === 200) {
+                          this.msgSuccess('创建成功')
+                          this.open = false
+                          this.getList()
+                        } else {
+                          this.msgError(res.msg)
+                        }
+                    })
+                })
               } else {
                 this.msgError(response.msg)
               }
-            })
+            }).catch()
+            // addTbStudent(this.form).then(response => {
+            //   if (response.code === 200) {
+            //     this.msgSuccess(response.msg)
+            //     this.open = false
+            //     this.getList()
+                
+            //     const saveParams = {
+            //         deptId:11,
+            //         // email:"270@qq.com",
+            //         nickName: this.form.name,
+            //         password:"123456",
+            //         phone:this.form.tel,
+            //         postId:1,
+            //         roleId:4,
+            //         sex:this.form.sex,
+            //         status:"2",
+            //         username: this.form.name,
+            //     }
+            //     addUser(saveParams).then(response => {
+            //       console.log(response);
+            //     }).catch((err)=>{console.log(err);})
+            //   } else {
+            //     this.msgError(response.msg)
+            //   }
+            // })
           }
         }
       })
@@ -480,6 +606,8 @@ export default {
           this.msgSuccess(response.msg)
           this.open = false
           this.getList()
+
+          delUser({ 'ids': Ids }).then().catch(err=>console.log(err);)
         } else {
           this.msgError(response.msg)
         }

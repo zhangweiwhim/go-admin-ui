@@ -4,7 +4,7 @@
       <el-card class="box-card">
         <el-row :gutter="20">
           <!--部门数据-->
-          <!-- <el-col :span="4" :xs="24">
+           <!-- <el-col :span="4" :xs="24">
             <div class="head-container">
               <el-input
                 v-model="deptName"
@@ -115,7 +115,7 @@
               <el-table-column label="编号" width="75" prop="userId" sortable="custom" />
               <el-table-column label="登录名" width="105" prop="username" sortable="custom" :show-overflow-tooltip="true" />
               <el-table-column label="昵称" prop="nickName" :show-overflow-tooltip="true" />
-              <el-table-column label="部门" prop="dept.deptName" :show-overflow-tooltip="true" />
+              <!-- <el-table-column label="部门" prop="dept.deptName" :show-overflow-tooltip="true" /> -->
               <el-table-column label="手机号" prop="phone" width="108" />
               <el-table-column label="状态" width="80" sortable="custom">
                 <template slot-scope="scope">
@@ -190,7 +190,7 @@
                 <el-input v-model="form.nickName" placeholder="请输入用户昵称" />
               </el-form-item>
             </el-col>
-             <!-- <el-col :span="12">
+            <!-- <el-col :span="12">
               <el-form-item label="归属部门" prop="deptId">
                 <treeselect
                   v-model="form.deptId"
@@ -217,6 +217,19 @@
             <el-col :span="12">
               <el-form-item v-if="form.userId == undefined" label="用户密码" prop="password">
                 <el-input v-model="form.password" placeholder="请输入用户密码" type="password" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="角色" prop="roleId">
+                <el-select v-model="form.roleId" placeholder="请选择" @change="$forceUpdate()">
+                  <el-option
+                    v-for="item in roleOptions"
+                    :key="item.roleId"
+                    :label="item.roleName"
+                    :value="item.roleId"
+                    :disabled="item.status == 1"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -255,20 +268,7 @@
                   />
                 </el-select>
               </el-form-item>
-            </el-col> -->
-            <el-col :span="12">
-              <el-form-item label="角色">
-                <el-select v-model="form.roleId" placeholder="请选择" @change="$forceUpdate()">
-                  <el-option
-                    v-for="item in roleOptions"
-                    :key="item.roleId"
-                    :label="item.roleName"
-                    :value="item.roleId"
-                    :disabled="item.status == 1"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
+            </el-col>  -->
             <el-col :span="24">
               <el-form-item label="备注">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -397,6 +397,7 @@ export default {
       rules: {
         username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
         nickName: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
+        roleId: [{ required: true, message: '用户角色不能为空', trigger: 'blur' }],
         // deptId: [{ required: true, message: '归属部门不能为空', trigger: 'blur' }],
         password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }],
         email: [
@@ -442,9 +443,9 @@ export default {
     },
     /** 查询部门下拉树结构 */
     getTreeselect() {
-      // treeselect().then(response => {
-       // this.deptOptions = response.data
-     // })
+      treeselect().then(response => {
+       this.deptOptions = response.data
+      })
     },
     // 筛选节点
     filterNode(value, data) {
@@ -593,8 +594,11 @@ export default {
     submitForm: function() {
       this.$refs['form'].validate(valid => {
         if (valid) {
+          const saveParams = JSON.parse(JSON.stringify(this.form))
+            saveParams.deptId= 11
+            saveParams.postId= 1
           if (this.form.userId !== undefined) {
-            updateUser(this.form).then(response => {
+            updateUser(saveParams).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
@@ -604,7 +608,7 @@ export default {
               }
             })
           } else {
-            addUser(this.form).then(response => {
+            addUser(saveParams).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false

@@ -88,11 +88,19 @@
             align="center"
             prop="examType"
             :show-overflow-tooltip="true"
-          /><el-table-column label="考试科目" align="center" prop="examSub" :formatter="examSubFormat" width="100">
+          />
+          <!-- <el-table-column label="考试科目" align="center" prop="examSub" :formatter="examSubFormat" width="100">
             <template slot-scope="scope">
               {{ examSubFormat(scope.row) }}
             </template>
-          </el-table-column><el-table-column label="学期名称" align="center" prop="termName" :formatter="termNameFormat" width="100">
+          </el-table-column> -->
+          <el-table-column
+            label="考试科目" 
+            align="center"
+            prop="examSub"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column label="学期名称" align="center" prop="termName" :formatter="termNameFormat" width="100">
             <template slot-scope="scope">
               {{ termNameFormat(scope.row) }}
             </template>
@@ -177,6 +185,7 @@
             </el-form-item>
             <el-form-item label="考试科目" prop="examSub">
               <el-select
+                multiple
                 v-model="form.examSub"
                 placeholder="请选择"
               >
@@ -294,7 +303,7 @@ export default {
         examStart: undefined,
         examEnd: undefined,
         examType: undefined,
-        examSub: undefined,
+        examSub: [],
         termName: undefined
       }
       this.resetForm('form')
@@ -305,9 +314,9 @@ export default {
     fileClose: function() {
       this.fileOpen = false
     },
-    examSubFormat(row) {
-      return this.selectItemsLabel(this.examSubOptions, row.examSub)
-    },
+    // examSubFormat(row) {
+    //   return this.selectItemsLabel(this.examSubOptions, row.examSub)
+    // },
     termNameFormat(row) {
       return this.selectItemsLabel(this.termNameOptions, row.termName)
     },
@@ -354,6 +363,7 @@ export default {
                 row.id || this.ids
       getTbExam(id).then(response => {
         this.form = response.data
+        this.form.examSub = response.data.examSub?response.data.examSub.split(','):[]
         this.open = true
         this.title = '修改考试管理'
         this.isEdit = true
@@ -363,8 +373,10 @@ export default {
     submitForm: function() {
       this.$refs['form'].validate(valid => {
         if (valid) {
+          const saveParams = JSON.parse(JSON.stringify(this.form))
+            saveParams.examSub= saveParams.examSub.join(',')||undefined
           if (this.form.id !== undefined) {
-            updateTbExam(this.form).then(response => {
+            updateTbExam(saveParams).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
@@ -374,7 +386,7 @@ export default {
               }
             })
           } else {
-            addTbExam(this.form).then(response => {
+            addTbExam(saveParams).then(response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false

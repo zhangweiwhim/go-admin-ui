@@ -59,6 +59,7 @@ export default {
             response => {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
+                this.$emit('closeEdit')
               } else {
                 this.msgError(response.msg)
               }
@@ -70,6 +71,7 @@ export default {
     close() {
       this.$store.dispatch('tagsView/delView', this.$route)
       this.$router.push({ path: '/index' })
+      this.$emit('closeEdit')
     }
   }
 }
