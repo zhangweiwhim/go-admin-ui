@@ -412,7 +412,7 @@ export default {
         return
       }
       listTbStudent({pageIndex: 1
-        pageSize: 10000
+        pageSize: 10000,
         grade: this.form.grade,
         class: this.form.class,
         beginTime: '',

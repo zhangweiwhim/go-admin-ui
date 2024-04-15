@@ -106,7 +106,7 @@ export default {
           this.roleName = '暂无'
         }
         this.dept = response.data.user.dept
-        this.deptName = this.dept.deptName
+        this.deptName = this.dept?.deptName
       })
     }
   }

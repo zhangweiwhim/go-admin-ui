@@ -640,7 +640,7 @@ export default {
           this.msgSuccess(response.msg)
           this.open = false
           this.getList()
-          delUser({ 'ids': Ids }).then().catch(err=>console.log(err);)
+          delUser({ 'ids': Ids }).then().catch(err=>console.log(err))
         } else {
           this.msgError(response.msg)
         }
