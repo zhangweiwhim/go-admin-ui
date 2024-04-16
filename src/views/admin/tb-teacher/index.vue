@@ -36,16 +36,17 @@
           </el-form-item>
           <el-form-item label="任职年级" prop="tecNowGrade">
             <el-select
-                v-model="queryParams.tecNowGrade"
-                placeholder="请选择"
-              >
-                <el-option
-                  v-for="dict in gradeOptions"
-                  :key="dict.key"
-                  :label="dict.value"
-                  :value="dict.key"
-                />
-              </el-select>
+              v-model="queryParams.tecNowGrade"
+              placeholder="请选择"
+              @change="changeSeachFormClassOp"
+            >
+              <el-option
+                v-for="dict in gradeOptions"
+                :key="dict.key"
+                :label="dict.value"
+                :value="dict.key"
+              />
+            </el-select>
             <!-- <el-input
             v-model="queryParams.tecNowGrade"
             placeholder="请输入任职年级"
@@ -56,15 +57,15 @@
           </el-form-item>
           <el-form-item label="任职班级" prop="tecNowClass">
             <el-select
-                v-model="queryParams.tecNowClass"
-                placeholder="请选择"
-              >
-                <el-option
-                  v-for="dict in classOptions"
-                  :key="dict.key"
-                  :label="dict.value"
-                  :value="dict.key"
-                />
+              v-model="queryParams.tecNowClass"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="dict in classOptions"
+                :key="dict.key"
+                :label="dict.value"
+                :value="dict.key"
+              />
             </el-select>
             <!-- <el-input
             v-model="queryParams.tecNowClass"
@@ -142,14 +143,13 @@
             prop="tecNowClass"
             :show-overflow-tooltip="true"
           />
-          
 
           <el-table-column label="性别" align="center" prop="sex" width="100">
             <template slot-scope="scope">
               {{ sexFormat[scope.row.sex] }}
             </template>
           </el-table-column>
-          
+
           <!-- <el-table-column
             label="性别"
             align="center"
@@ -163,7 +163,7 @@
             :show-overflow-tooltip="true"
           >
             <template slot-scope="scope">
-              <span>{{ parseTime(scope.row.inTime) }}</span>
+              <span>{{ parseTime(scope.row.inTime,'{y}-{m}-{d}') }}</span>
             </template>
           </el-table-column><el-table-column
             label="年龄"
@@ -278,6 +278,7 @@
               <el-select
                 v-model="form.tecNowGrade"
                 placeholder="请选择"
+                @change="changeClassOp"
               >
                 <el-option
                   v-for="dict in gradeOptions"
@@ -286,7 +287,7 @@
                   :value="dict.key"
                 />
               </el-select>
-              
+
             </el-form-item>
             <el-form-item label="任职班级" prop="tecNowClass">
               <el-select
@@ -294,29 +295,29 @@
                 placeholder="请选择"
               >
                 <el-option
-                  v-for="dict in classOptions"
+                  v-for="dict in addformClassOp"
                   :key="dict.key"
                   :label="dict.value"
                   :value="dict.key"
                 />
-            </el-select>
-              
+              </el-select>
+
             </el-form-item>
             <el-form-item label="性别" prop="sex">
-              <el-select  v-model="form.sex" placeholder="请选择">
-                  <el-option
-                    v-for="dict in sexOptions"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
+              <el-select v-model="form.sex" placeholder="请选择">
+                <el-option
+                  v-for="dict in sexOptions"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"
+                />
               </el-select>
-             
+
             </el-form-item>
             <el-form-item label="入值时间" prop="inTime">
               <el-date-picker
                 v-model="form.inTime"
-                type="datetime"
+                type="date"
                 placeholder="选择日期"
               />
             </el-form-item>
@@ -342,6 +343,12 @@
               <el-input
                 v-model="form.tel"
                 placeholder="电话"
+              />
+            </el-form-item>
+            <el-form-item label="邮箱" prop="email">
+              <el-input
+                v-model="form.email"
+                placeholder="邮箱"
               />
             </el-form-item>
             <el-form-item label="荣誉" prop="honorary">
@@ -377,7 +384,7 @@
 import { addTbTeacher, delTbTeacher, getTbTeacher, listTbTeacher, updateTbTeacher } from '@/api/admin/tb-teacher'
 import { listTbClass } from '@/api/admin/tb-class'
 import { listTbSub } from '@/api/admin/tb-sub'
-import { delUser, addUser,listUser } from '@/api/admin/sys-user'
+import { addUser } from '@/api/admin/sys-user'
 export default {
   name: 'TbTeacher',
   components: {
@@ -402,12 +409,14 @@ export default {
       // 类型数据字典
       typeOptions: [],
       tbTeacherList: [],
-      sexFormat:{},
+      sexFormat: {},
       // 关系表类型
       sexOptions: [],
       tecNowSubOptions: [],
       gradeOptions: [],
       classOptions: [],
+      addformClassOp: [],
+      gradeAndClass: [],
       // 查询参数
       queryParams: {
         pageIndex: 1,
@@ -423,7 +432,14 @@ export default {
       form: {
       },
       // 表单校验
-      rules: { name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
+      rules: {
+        age: [{ required: true, message: '年龄不能为空', trigger: 'blur' }],
+        sex: [{ required: true, message: '性别不能为空', trigger: 'blur' }],
+        email: [{ required: true, message: '邮箱不能为空', trigger: 'blur' }],
+        tel: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
+        inTime: [{ required: true, message: '入职时间不能为空', trigger: 'blur' }],
+
+        name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
         tecNo: [{ required: true, message: '工号不能为空', trigger: 'blur' }],
         tecNowSub: [{ required: true, message: '任职学科不能为空', trigger: 'blur' }],
         tecNowGrade: [{ required: true, message: '任职年级不能为空', trigger: 'blur' }],
@@ -441,14 +457,28 @@ export default {
       response.data.forEach(item => {
         newObj[item.value] = item.label
       })
-      this.sexFormat= newObj
+      this.sexFormat = newObj
     })
   },
   methods: {
+    changeSeachFormClassOp() {
+      this.classOptions = this.gradeAndClass.filter(i => i.grade === this.queryParams.tecNowGrade).map(j => ({ value: j.class, key: j.class }))
+      if (this.classOptions.every(i => i.value !== this.queryParams.tecNowClass)) {
+        this.queryParams.tecNowClass = ''
+      }
+    },
+    changeClassOp() {
+      this.addformClassOp = this.gradeAndClass.filter(i => i.grade === this.form.tecNowGrade).map(j => ({ value: j.class, key: j.class }))
+      if (this.addformClassOp.every(i => i.value !== this.form.tecNowClass)) {
+        this.form.tecNowClass = ''
+      }
+    },
     getTbClassItems() {
       this.getItems(listTbClass, undefined).then(res => {
-        this.gradeOptions = this.setItems(res, 'grade', 'grade')
-        this.classOptions = this.setItems(res, 'class', 'class')
+        this.gradeAndClass = res.data.list.map(i => ({ grade: i.grade, class: i.class }))
+        const gradeList = res.data.list.map(i => i.grade)
+        this.gradeOptions = [...new Set(gradeList)].map(j => ({ value: j, key: j }))
+        this.classOptions = []
       })
     },
     /** 查询参数列表 */
@@ -481,6 +511,7 @@ export default {
         idNo: undefined,
         address: undefined,
         tel: undefined,
+        email: undefined,
         honorary: undefined,
         resume: undefined,
         otherTel: undefined,
@@ -497,7 +528,7 @@ export default {
     tecNowSubFormat(row) {
       return this.selectItemsLabel(this.tecNowSubOptions, row.tecNowSub)
     },
-  
+
     // 关系
     getTbSubItems() {
       this.getItems(listTbSub, undefined).then(res => {
@@ -519,6 +550,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset()
+      this.addformClassOp = []
       this.open = true
       this.title = '添加教师管理'
       this.isEdit = false
@@ -539,6 +571,7 @@ export default {
         this.open = true
         this.title = '修改教师管理'
         this.isEdit = true
+        this.changeClassOp()
       })
     },
     /** 提交按钮 */
@@ -556,71 +589,57 @@ export default {
               }
             })
           } else {
-            // 
-          const saveParams = {
-              deptId:11,
-              // email:"270@qq.com",
-              nickName: this.form.name,
-              password:"123456",
-              phone:this.form.tel,
-              postId:1,
-              roleId:5,
-              sex:this.form.sex,
-              status:"2",
-              username: this.form.name,
-          }
-         
-          addUser(saveParams).then(response => {
+            //
+
+            // addUser(saveParams).then(response => {
+            //     if (response.code === 200) {
+
+            //       listUser({ pageIndex: 1,
+            //         pageSize: 10000,}).then(users => {
+            //           const commonNameList = users.data.list.filter(d=>d.username==this.form.name&&d.nickName==this.form.name&&d.roleId==5).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())
+            //           console.log(12333, '新增的用户',commonNameList );
+            //           const createParams = JSON.parse(JSON.stringify(this.form))
+            //           createParams.id = commonNameList[0]?.userId
+            //           updateTbTeacher(createParams).then(res => {
+            //               if (res.code === 200) {
+            //                 this.msgSuccess('创建成功')
+            //                 this.open = false
+            //                 this.getList()
+            //               } else {
+            //                 this.msgError(res.msg)
+            //               }
+            //           })
+            //       })
+            //     } else {
+            //       this.msgError(response.msg)
+            //     }
+            //   }).catch()
+
+            addTbTeacher(this.form).then(response => {
               if (response.code === 200) {
-               
-                listUser({ pageIndex: 1,
-                  pageSize: 10000,}).then(users => {
-                    const commonNameList = users.data.list.filter(d=>d.username==this.form.name&&d.nickName==this.form.name&&d.roleId==5).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())
-                    console.log(12333, '新增的用户',commonNameList );
-                    const createParams = JSON.parse(JSON.stringify(this.form))
-                    createParams.id = commonNameList[0]?.userId
-                    updateTbTeacher(createParams).then(res => {
-                        if (res.code === 200) {
-                          this.msgSuccess('创建成功')
-                          this.open = false
-                          this.getList()
-                        } else {
-                          this.msgError(res.msg)
-                        }
-                    })
-                })
+                this.msgSuccess(response.msg)
+                this.open = false
+                this.getList()
+
+                const saveParams = {
+                  deptId: 11,
+                  email: this.form.email,
+                  nickName: this.form.name,
+                  password: '123456',
+                  phone: this.form.tel,
+                  postId: 1,
+                  roleId: 5,
+                  sex: this.form.sex,
+                  status: '2',
+                  username: this.form.name
+                }
+                addUser(saveParams).then(response => {
+                  console.log(response)
+                }).catch((err) => { console.log(err) })
               } else {
                 this.msgError(response.msg)
               }
-            }).catch()
-          
-
-            // addTbTeacher(this.form).then(response => {
-            //   if (response.code === 200) {
-            //     this.msgSuccess(response.msg)
-            //     this.open = false
-            //     this.getList()
-                 
-            //      const saveParams = {
-            //         deptId:11,
-            //         // email:"270@qq.com",
-            //         nickName: this.form.name,
-            //         password:"123456",
-            //         phone:this.form.tel,
-            //         postId:1,
-            //         roleId:5,
-            //         sex:this.form.sex,
-            //         status:"2",
-            //         username: this.form.name,
-            //     }
-            //     addUser(saveParams).then(response => {
-            //       console.log(response);
-            //     }).catch((err)=>{console.log(err);})
-
-            //   } else {
-            //     this.msgError(response.msg)
-            //   }
-            // })
+            })
           }
         }
       })
@@ -640,7 +659,7 @@ export default {
           this.msgSuccess(response.msg)
           this.open = false
           this.getList()
-          delUser({ 'ids': Ids }).then().catch(err=>console.log(err))
+          // delUser({ 'ids': Ids }).then().catch(err=>console.log(err))
         } else {
           this.msgError(response.msg)
         }

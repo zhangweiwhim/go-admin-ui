@@ -4,32 +4,78 @@
     <template #wrapper>
       <el-card class="box-card">
         <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
-          <el-form-item label="任教年级" prop="grade"><el-input
+          <el-form-item label="任教年级" prop="grade">
+            <el-select
+              v-model="queryParams.grade"
+              placeholder="请选择"
+              clearable
+              size="small"
+              @change="changeSeachFormClassOp"
+            >
+              <el-option
+                v-for="dict in gradeOptions"
+                :key="dict.key"
+                :label="dict.value"
+                :value="dict.key"
+              />
+            </el-select>
+            <!-- <el-input
             v-model="queryParams.grade"
             placeholder="请输入任教年级"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
-          <el-form-item label="任教班级" prop="class"><el-input
+          <el-form-item label="任教班级" prop="class">
+            <el-select
+              v-model="queryParams.class"
+              placeholder="请选择"
+              clearable
+              size="small"
+            >
+              <el-option
+                v-for="dict in classOptions"
+                :key="dict.key"
+                :label="dict.value"
+                :value="dict.key"
+              />
+            </el-select>
+            <!-- <el-input
             v-model="queryParams.class"
             placeholder="请输入任教班级"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
-          <el-form-item label="任教学科" prop="subject"><el-input
+          <el-form-item label="任教学科" prop="subject">
+
+            <el-select
+              v-model="queryParams.subject"
+              placeholder="请选择"
+              clearable
+              size="small"
+            >
+              <el-option
+                v-for="dict in subjectOptions"
+                :key="dict.key"
+                :label="dict.value"
+                :value="dict.key"
+              />
+            </el-select>
+
+            <!-- <el-input
             v-model="queryParams.subject"
             placeholder="请输入任教学科"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
           <el-form-item label="教师名称" prop="techName"><el-select
             v-model="queryParams.techName"
+            filterable
             placeholder="请选择"
             clearable
             size="small"
@@ -44,6 +90,7 @@
           </el-form-item>
           <el-form-item label="教师工号" prop="techNo"><el-select
             v-model="queryParams.techNo"
+            filterable
             placeholder="请选择"
             clearable
             size="small"
@@ -128,7 +175,7 @@
             align="center"
             prop="subject"
             :show-overflow-tooltip="true"
-          /><el-table-column label="教师名称" align="center" prop="techName" :formatter="techNameFormat" width="100">
+          /><el-table-column label="教师名称" align="center" prop="techName" :formatter="techNameFormat" width="200">
             <template slot-scope="scope">
               {{ techNameFormat(scope.row) }}
             </template>
@@ -136,7 +183,7 @@
             <template slot-scope="scope">
               {{ techNoFormat(scope.row) }}
             </template>
-          </el-table-column><el-table-column label="任教学期" align="center" prop="techTerm" :formatter="techTermFormat" width="100">
+          </el-table-column><el-table-column label="任教学期" align="center" prop="techTerm" :formatter="techTermFormat">
             <template slot-scope="scope">
               {{ techTermFormat(scope.row) }}
             </template>
@@ -190,22 +237,58 @@
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
 
             <el-form-item label="任教年级" prop="grade">
-              <el-input
+              <el-select
                 v-model="form.grade"
-                placeholder="任教年级"
-              />
+                placeholder="请选择"
+                @change="changeClassOp"
+              >
+                <el-option
+                  v-for="dict in gradeOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+              <!-- <el-input
+                v-model="form.grade"
+                placeholder="任教年级"  />-->
+
             </el-form-item>
             <el-form-item label="任教班级" prop="class">
-              <el-input
+              <el-select
+                v-model="form.class"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in addformClassOp"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+              <!-- <el-input
                 v-model="form.class"
                 placeholder="任教班级"
-              />
+              /> -->
             </el-form-item>
             <el-form-item label="任教学科" prop="subject">
-              <el-input
+              <el-select
+                v-model="form.subject"
+                placeholder="请选择"
+                clearable
+                size="small"
+              >
+                <el-option
+                  v-for="dict in subjectOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+              <!-- <el-input
                 v-model="form.subject"
                 placeholder="任教学科"
-              />
+              /> -->
             </el-form-item>
             <el-form-item label="教师名称" prop="techName">
               <el-input
@@ -245,7 +328,8 @@
 
 <script>
 import { addTbTeachAll, delTbTeachAll, getTbTeachAll, listTbTeachAll, updateTbTeachAll } from '@/api/admin/tb-teach-all'
-
+import { listTbClass } from '@/api/admin/tb-class'
+import { listTbSub } from '@/api/admin/tb-sub'
 import { listTbTeacher } from '@/api/admin/tb-teacher'
 import { listTbTerm } from '@/api/admin/tb-term'
 export default {
@@ -277,7 +361,11 @@ export default {
       techNameOptions: [],
       techNoOptions: [],
       techTermOptions: [],
-
+      addformClassOp: [],
+      classOptions: [],
+      gradeAndClass: [],
+      gradeOptions: [],
+      subjectOptions: [],
       // 查询参数
       queryParams: {
         pageIndex: 1,
@@ -308,8 +396,40 @@ export default {
     this.getTbTeacherItems()
     this.getTbTeacherItems()
     this.getTbTermItems()
+    this.getTbClassItems()
+    this.getSubList()
   },
   methods: {
+    getSubList() {
+      listTbSub({
+        pageIndex: 1,
+        pageSize: 10000
+      }).then(response => {
+        const subList = response.data.list.map(i => i.name)
+        this.subjectOptions = [...new Set(subList)].map(i => ({ key: i, value: i }))
+      })
+    },
+    getTbClassItems() {
+      this.getItems(listTbClass, undefined).then(res => {
+        this.gradeAndClass = res.data.list.map(i => ({ grade: i.grade, class: i.class }))
+
+        const gradeList = res.data.list.map(i => i.grade)
+        this.gradeOptions = [...new Set(gradeList)].map(j => ({ value: j, key: j }))
+        this.classOptions = []
+      })
+    },
+    changeSeachFormClassOp() {
+      this.classOptions = this.gradeAndClass.filter(i => i.grade === this.queryParams.grade).map(j => ({ value: j.class, key: j.class }))
+      if (this.classOptions.every(i => i.value !== this.queryParams.class)) {
+        this.queryParams.class = ''
+      }
+    },
+    changeClassOp() {
+      this.addformClassOp = this.gradeAndClass.filter(i => i.grade === this.form.grade).map(j => ({ value: j.class, key: j.class }))
+      if (this.addformClassOp.every(i => i.value !== this.form.class)) {
+        this.form.class = ''
+      }
+    },
     /** 查询参数列表 */
     getList() {
       this.loading = true
@@ -380,6 +500,7 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
+      this.addformClassOp = []
       this.reset()
       this.open = true
       this.title = '添加任教管理'
@@ -401,6 +522,7 @@ export default {
         this.open = true
         this.title = '修改任教管理'
         this.isEdit = true
+        this.changeClassOp()
       })
     },
     /** 提交按钮 */

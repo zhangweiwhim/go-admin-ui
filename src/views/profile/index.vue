@@ -2,7 +2,7 @@
   <BasicLayout>
     <template #wrapper>
       <el-row :gutter="10">
-        <el-col :class="{show: !isEdit,hidden:isEdit}" :span="10" :xs="24">
+        <el-col :class="{show: !isEdit,hidden:isEdit}" :span="18" :xs="24">
           <el-card class="box-card">
             <div slot="header" class="clearfix">
               <span>个人信息</span>

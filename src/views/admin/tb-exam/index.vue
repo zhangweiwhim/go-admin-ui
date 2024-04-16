@@ -4,13 +4,19 @@
     <template #wrapper>
       <el-card class="box-card">
         <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
-          <el-form-item label="开始时间" prop="examStart"><el-input
+          <el-form-item label="开始时间" prop="examStart">
+            <el-date-picker
+              v-model="queryParams.examStart"
+              type="date"
+              placeholder="选择日期"
+            />
+            <!-- <el-input
             v-model="queryParams.examStart"
             placeholder="请输入开始时间"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
           <el-form-item label="考试批次" prop="examType"><el-input
             v-model="queryParams.examType"
@@ -73,17 +79,42 @@
             align="center"
             prop="examClass"
             :show-overflow-tooltip="true"
-          /><el-table-column
+          />
+          <!-- <el-table-column
             label="开始时间"
             align="center"
             prop="examStart"
             :show-overflow-tooltip="true"
-          /><el-table-column
+          />
+          <el-table-column
             label="结束时间"
             align="center"
             prop="examEnd"
             :show-overflow-tooltip="true"
-          /><el-table-column
+          /> -->
+          <el-table-column
+            label="开始时间"
+            align="center"
+            prop="examStart"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.examStart,'{y}-{m}-{d}') }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column
+            label="结束时间"
+            align="center"
+            prop="examEnd"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.examEnd,'{y}-{m}-{d}') }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column
             label="考试批次"
             align="center"
             prop="examType"
@@ -95,12 +126,12 @@
             </template>
           </el-table-column> -->
           <el-table-column
-            label="考试科目" 
+            label="考试科目"
             align="center"
             prop="examSub"
             :show-overflow-tooltip="true"
           />
-          <el-table-column label="学期名称" align="center" prop="termName" :formatter="termNameFormat" width="100">
+          <el-table-column label="学期名称" align="center" prop="termName" :formatter="termNameFormat">
             <template slot-scope="scope">
               {{ termNameFormat(scope.row) }}
             </template>
@@ -154,28 +185,62 @@
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
 
             <el-form-item label="年级" prop="examGrade">
-              <el-input
+
+              <el-select
+                v-model="form.examGrade"
+                placeholder="请选择"
+                @change="changeClassOp"
+              >
+                <el-option
+                  v-for="dict in gradeOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+              <!-- <el-input
                 v-model="form.examGrade"
                 placeholder="年级"
-              />
+              /> -->
             </el-form-item>
             <el-form-item label="班级" prop="examClass">
-              <el-input
+              <el-select
+                v-model="form.examClass"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in addformClassOp"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+              <!-- <el-input
                 v-model="form.examClass"
                 placeholder="班级"
-              />
+              /> -->
             </el-form-item>
             <el-form-item label="开始时间" prop="examStart">
-              <el-input
+              <el-date-picker
+                v-model="form.examStart"
+                type="date"
+                placeholder="选择日期"
+              />
+              <!-- <el-input
                 v-model="form.examStart"
                 placeholder="开始时间"
-              />
+              /> -->
             </el-form-item>
             <el-form-item label="结束时间" prop="examEnd">
-              <el-input
+              <el-date-picker
+                v-model="form.examEnd"
+                type="date"
+                placeholder="选择日期"
+              />
+              <!-- <el-input
                 v-model="form.examEnd"
                 placeholder="结束时间"
-              />
+              /> -->
             </el-form-item>
             <el-form-item label="考试批次" prop="examType">
               <el-input
@@ -185,8 +250,8 @@
             </el-form-item>
             <el-form-item label="考试科目" prop="examSub">
               <el-select
-                multiple
                 v-model="form.examSub"
+                multiple
                 placeholder="请选择"
               >
                 <el-option
@@ -223,7 +288,7 @@
 
 <script>
 import { addTbExam, delTbExam, getTbExam, listTbExam, updateTbExam } from '@/api/admin/tb-exam'
-
+import { listTbClass } from '@/api/admin/tb-class'
 import { listTbSub } from '@/api/admin/tb-sub'
 import { listTbTerm } from '@/api/admin/tb-term'
 export default {
@@ -255,6 +320,11 @@ export default {
       examSubOptions: [],
       termNameOptions: [],
 
+      gradeOptions: [],
+
+      addformClassOp: [],
+      gradeAndClass: [],
+
       // 查询参数
       queryParams: {
         pageIndex: 1,
@@ -276,8 +346,22 @@ export default {
     this.getList()
     this.getTbSubItems()
     this.getTbTermItems()
+    this.getTbClassItems()
   },
   methods: {
+    changeClassOp() {
+      this.addformClassOp = this.gradeAndClass.filter(i => i.grade === this.form.examGrade).map(j => ({ value: j.class, key: j.class }))
+      if (this.addformClassOp.every(i => i.value !== this.form.examClass)) {
+        this.form.examClass = ''
+      }
+    },
+    getTbClassItems() {
+      this.getItems(listTbClass, undefined).then(res => {
+        this.gradeAndClass = res.data.list.map(i => ({ grade: i.grade, class: i.class }))
+        const gradeList = res.data.list.map(i => i.grade)
+        this.gradeOptions = [...new Set(gradeList)].map(j => ({ value: j, key: j }))
+      })
+    },
     /** 查询参数列表 */
     getList() {
       this.loading = true
@@ -363,7 +447,7 @@ export default {
                 row.id || this.ids
       getTbExam(id).then(response => {
         this.form = response.data
-        this.form.examSub = response.data.examSub?response.data.examSub.split(','):[]
+        this.form.examSub = response.data.examSub ? response.data.examSub.split(',') : []
         this.open = true
         this.title = '修改考试管理'
         this.isEdit = true
@@ -374,7 +458,7 @@ export default {
       this.$refs['form'].validate(valid => {
         if (valid) {
           const saveParams = JSON.parse(JSON.stringify(this.form))
-            saveParams.examSub= saveParams.examSub.join(',')||undefined
+          saveParams.examSub = saveParams.examSub.join(',') || undefined
           if (this.form.id !== undefined) {
             updateTbExam(saveParams).then(response => {
               if (response.code === 200) {

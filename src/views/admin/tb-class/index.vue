@@ -18,21 +18,52 @@
             />
           </el-select>
           </el-form-item>
-          <el-form-item label="年级" prop="grade"><el-input
+          <el-form-item label="年级" prop="grade">
+
+            <el-select
+              v-model="queryParams.grade"
+              placeholder="请选择"
+              clearable
+              size="small"
+              @change="changeClassOp"
+            >
+              <el-option
+                v-for="dict in gradeOptions"
+                :key="dict.key"
+                :label="dict.value"
+                :value="dict.key"
+              />
+            </el-select>
+
+            <!-- <el-input
             v-model="queryParams.grade"
             placeholder="请输入年级"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
-          <el-form-item label="班级" prop="class"><el-input
+          <el-form-item label="班级" prop="class">
+            <el-select
+              v-model="queryParams.class"
+              placeholder="请选择"
+              clearable
+              size="small"
+            >
+              <el-option
+                v-for="dict in classOptions"
+                :key="dict.key"
+                :label="dict.value"
+                :value="dict.key"
+              />
+            </el-select>
+            <!-- <el-input
             v-model="queryParams.class"
             placeholder="请输入班级"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
           <el-form-item label="班主任" prop="headTeacher"><el-input
             v-model="queryParams.headTeacher"
@@ -203,7 +234,6 @@
         <el-dialog :title="title" :visible.sync="open" width="500px">
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
 
-            
             <el-form-item label="学期" prop="xueqi">
               <el-select
                 v-model="form.xueqi"
@@ -337,7 +367,9 @@ export default {
 
       // 关系表类型
       xueqiOptions: [],
-
+      gradeOptions: [],
+      classOptions: [],
+      gradeAndClass: [],
       // 查询参数
       queryParams: {
         pageIndex: 1,
@@ -360,17 +392,32 @@ export default {
     }
   },
   created() {
-    this.getList()
+    this.getList(true)
     this.getTbTermItems()
   },
   methods: {
+
+    changeClassOp() {
+      this.classOptions = this.gradeAndClass.filter(i => i.grade === this.queryParams.grade).map(j => ({ value: j.class, key: j.class }))
+      if (this.classOptions.every(i => i.value !== this.queryParams.class)) {
+        this.queryParams.class = ''
+      }
+    },
+
     /** 查询参数列表 */
-    getList() {
+    getList(flag) {
       this.loading = true
       listTbClass(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
         this.tbClassList = response.data.list
         this.total = response.data.count
         this.loading = false
+
+        if (flag) {
+          this.gradeAndClass = response.data.list.map(i => ({ grade: i.grade, class: i.class }))
+          const gradeList = response.data.list.map(i => i.grade)
+          this.gradeOptions = [...new Set(gradeList)].map(j => ({ value: j, key: j }))
+          this.classOptions = []
+        }
       }
       )
     },
@@ -427,7 +474,8 @@ export default {
     resetQuery() {
       this.dateRange = []
       this.resetForm('queryForm')
-      this.handleQuery()
+      this.queryParams.pageIndex = 1
+      this.getList(true)
     },
     /** 新增按钮操作 */
     handleAdd() {
@@ -463,7 +511,7 @@ export default {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
-                this.getList()
+                this.resetQuery()
               } else {
                 this.msgError(response.msg)
               }
@@ -473,12 +521,13 @@ export default {
               if (response.code === 200) {
                 this.msgSuccess(response.msg)
                 this.open = false
-                this.getList()
+                this.resetQuery()
               } else {
                 this.msgError(response.msg)
               }
             })
           }
+          this.getclassInfo()
         }
       })
     },
@@ -496,7 +545,7 @@ export default {
         if (response.code === 200) {
           this.msgSuccess(response.msg)
           this.open = false
-          this.getList()
+          this.resetQuery()
         } else {
           this.msgError(response.msg)
         }

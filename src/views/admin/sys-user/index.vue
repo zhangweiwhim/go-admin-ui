@@ -4,7 +4,7 @@
       <el-card class="box-card">
         <el-row :gutter="20">
           <!--部门数据-->
-           <!-- <el-col :span="4" :xs="24">
+          <!-- <el-col :span="4" :xs="24">
             <div class="head-container">
               <el-input
                 v-model="deptName"
@@ -113,11 +113,21 @@
             >
               <el-table-column type="selection" width="45" align="center" />
               <el-table-column label="编号" width="75" prop="userId" sortable="custom" />
-              <el-table-column label="登录名" width="105" prop="username" sortable="custom" :show-overflow-tooltip="true" />
+              <el-table-column label="登录名" prop="username" sortable="custom" :show-overflow-tooltip="true" />
               <el-table-column label="昵称" prop="nickName" :show-overflow-tooltip="true" />
+
+              <el-table-column
+                label="角色"
+                prop="roleId"
+                :show-overflow-tooltip="true"
+              >
+                <template slot-scope="scope">
+                  <span>{{ roleOptions.find(r=>r.roleId==scope.row.roleId)&&roleOptions.find(r=>r.roleId==scope.row.roleId).roleName }}</span>
+                </template>
+              </el-table-column>
               <!-- <el-table-column label="部门" prop="dept.deptName" :show-overflow-tooltip="true" /> -->
-              <el-table-column label="手机号" prop="phone" width="108" />
-              <el-table-column label="状态" width="80" sortable="custom">
+              <el-table-column label="手机号" prop="phone" />
+              <el-table-column label="状态" sortable="custom" width="80">
                 <template slot-scope="scope">
                   <el-switch
                     v-model="scope.row.status"
@@ -131,7 +141,6 @@
                 label="创建时间"
                 prop="createdAt"
                 sortable="custom"
-                width="155"
               >
                 <template slot-scope="scope">
                   <span>{{ parseTime(scope.row.createdAt) }}</span>
@@ -139,7 +148,6 @@
               </el-table-column>
               <el-table-column
                 label="操作"
-                width="160"
 
                 fix="right"
                 class-name="small-padding fixed-width"
@@ -256,7 +264,7 @@
               </el-form-item>
             </el-col>
 
-             <!-- <el-col :span="12">
+            <!-- <el-col :span="12">
               <el-form-item label="岗位">
                 <el-select v-model="form.postId" placeholder="请选择" @change="$forceUpdate()">
                   <el-option
@@ -323,12 +331,12 @@ import { listPost } from '@/api/admin/sys-post'
 import { listRole } from '@/api/admin/sys-role'
 import { treeselect } from '@/api/admin/sys-dept'
 
-import Treeselect from '@riophae/vue-treeselect'
+// import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
 export default {
   name: 'SysUserManage',
-  components: { Treeselect },
+  // components: { Treeselect },
   data() {
     return {
       // 遮罩层
@@ -429,6 +437,9 @@ export default {
     this.getConfigKey('sys_user_initPassword').then(response => {
       this.initPassword = response.data.configValue
     })
+    listRole({ pageSize: 1000 }).then(response => {
+      this.roleOptions = response.data.list
+    })
   },
   methods: {
     /** 查询用户列表 */
@@ -444,7 +455,7 @@ export default {
     /** 查询部门下拉树结构 */
     getTreeselect() {
       treeselect().then(response => {
-       this.deptOptions = response.data
+        this.deptOptions = response.data
       })
     },
     // 筛选节点
@@ -550,9 +561,7 @@ export default {
       listPost({ pageSize: 1000 }).then(response => {
         this.postOptions = response.data.list
       })
-      listRole({ pageSize: 1000 }).then(response => {
-        this.roleOptions = response.data.list
-      })
+
       this.open = true
       this.title = '添加用户'
       this.form.password = this.initPassword
@@ -571,9 +580,9 @@ export default {
       listPost({ pageSize: 1000 }).then(response => {
         this.postOptions = response.data.list
       })
-      listRole({ pageSize: 1000 }).then(response => {
-        this.roleOptions = response.data.list
-      })
+      // listRole({ pageSize: 1000 }).then(response => {
+      //   this.roleOptions = response.data.list
+      // })
     },
     /** 重置密码按钮操作 */
     handleResetPwd(row) {
@@ -595,8 +604,8 @@ export default {
       this.$refs['form'].validate(valid => {
         if (valid) {
           const saveParams = JSON.parse(JSON.stringify(this.form))
-            saveParams.deptId= 11
-            saveParams.postId= 1
+          saveParams.deptId = 11
+          saveParams.postId = 1
           if (this.form.userId !== undefined) {
             updateUser(saveParams).then(response => {
               if (response.code === 200) {

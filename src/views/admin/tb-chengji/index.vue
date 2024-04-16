@@ -34,13 +34,19 @@
             @keyup.enter.native="handleQuery"
           />
           </el-form-item>
-          <el-form-item label="考试时间" prop="kaoshiTime"><el-input
+          <el-form-item label="考试时间" prop="kaoshiTime">
+            <el-date-picker
+              v-model="queryParams.kaoshiTime"
+              type="date"
+              placeholder="选择日期"
+            />
+            <!-- <el-input
             v-model="queryParams.kaoshiTime"
             placeholder="请输入考试时间"
             clearable
             size="small"
             @keyup.enter.native="handleQuery"
-          />
+          /> -->
           </el-form-item>
 
           <el-form-item>
@@ -153,12 +159,24 @@
             align="center"
             prop="shengwuScore"
             :show-overflow-tooltip="true"
-          /><el-table-column
+          />
+
+          <el-table-column
             label="考试时间"
             align="center"
             prop="kaoshiTime"
             :show-overflow-tooltip="true"
-          />
+          >
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.kaoshiTime,'{y}-{m}-{d}') }}</span>
+            </template>
+          </el-table-column>
+          <!-- <el-table-column
+            label="考试时间"
+            align="center"
+            prop="kaoshiTime"
+            :show-overflow-tooltip="true"
+          /> -->
           <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
             <template slot-scope="scope">
               <el-popconfirm
@@ -265,10 +283,23 @@
 
             </el-form-item>
             <el-form-item label="考号" prop="kaoNo">
-              <el-input
+              <el-select
+                v-model="form.kaoNo"
+                filterable
+                :disabled="!stuIdOptions.length"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="dict in stuIdOptions"
+                  :key="dict.key"
+                  :label="dict.value"
+                  :value="dict.key"
+                />
+              </el-select>
+              <!-- <el-input
                 v-model="form.kaoNo"
                 placeholder="考号"
-              />
+              /> -->
             </el-form-item>
             <el-form-item label="语文" prop="yuwenScore">
               <el-input
@@ -325,10 +356,15 @@
               />
             </el-form-item>
             <el-form-item label="考试时间" prop="kaoshiTime">
-              <el-input
+              <el-date-picker
+                v-model="form.kaoshiTime"
+                type="date"
+                placeholder="选择日期"
+              />
+              <!-- <el-input
                 v-model="form.kaoshiTime"
                 placeholder="考试时间"
-              />
+              /> -->
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -375,7 +411,9 @@ export default {
       classOptions: [],
       xueqiOptions: [],
       studentOptions: [],
+      stuIdOptions: [],
 
+      gradeAndClass: [],
       // 查询参数
       queryParams: {
         pageIndex: 1,
@@ -404,10 +442,19 @@ export default {
     this.getTbClassItems()
   },
   methods: {
+
+    changeClassOp() {
+      this.classOptions = this.gradeAndClass.filter(i => i.grade === this.form.grade).map(j => ({ value: j.class, key: j.class }))
+      if (this.classOptions.every(i => i.value !== this.form.class)) {
+        this.form.class = ''
+      }
+    },
     /** 查询参数列表 */
     // 获取班级学生的信息
     getStudengtOp() {
+      this.changeClassOp()
       this.studentOptions = []
+      this.stuIdOptions = []
       if (!this.form.grade || !this.form.class) {
         return
       }
@@ -418,6 +465,7 @@ export default {
         beginTime: '',
         endTime: '' }).then(response => {
         this.studentOptions = this.setItems(response, 'name', 'name')
+        this.stuIdOptions = this.setItems(response, 'stuNo', 'stuNo')
       })
     },
     getList() {
@@ -472,9 +520,13 @@ export default {
     // 关系
     getTbClassItems() {
       this.getItems(listTbClass, undefined).then(res => {
-        this.gradeOptions = this.setItems(res, 'grade', 'grade')
-        this.classOptions = this.setItems(res, 'class', 'class')
-        this.xueqiOptions = this.setItems(res, 'xueqi', 'xueqi')
+        this.gradeAndClass = res.data.list.map(i => ({ grade: i.grade, class: i.class }))
+        const gradeList = res.data.list.map(i => i.grade)
+        this.gradeOptions = [...new Set(gradeList)].map(j => ({ value: j, key: j }))
+        this.classOptions = []
+
+        const xueqiList = res.data.list.map(i => i.xueqi)
+        this.xueqiOptions = [...new Set(xueqiList)].map(i => ({ key: i, value: i }))
       })
     },
     // 文件
@@ -495,6 +547,7 @@ export default {
       this.open = true
       this.title = '添加成绩管理'
       this.isEdit = false
+      this.classOptions = []
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -512,6 +565,7 @@ export default {
         this.open = true
         this.title = '修改成绩管理'
         this.isEdit = true
+        this.getStudengtOp()
       })
     },
     /** 提交按钮 */
