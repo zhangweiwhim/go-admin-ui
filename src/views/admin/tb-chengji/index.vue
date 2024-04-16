@@ -100,11 +100,19 @@
             <template slot-scope="scope">
               {{ gradeFormat(scope.row) }}
             </template>
-          </el-table-column><el-table-column label="班级" align="center" prop="class" :formatter="classFormat" width="100">
+          </el-table-column>
+          <el-table-column
+            label="班级"
+            align="center"
+            prop="class"
+            :show-overflow-tooltip="true"
+          />
+          <!-- <el-table-column label="班级" align="center" prop="class" :formatter="classFormat" width="100">
             <template slot-scope="scope">
               {{ classFormat(scope.row) }}
             </template>
-          </el-table-column><el-table-column
+          </el-table-column> -->
+          <el-table-column
             label="学期"
             align="center"
             prop="xueqi"
